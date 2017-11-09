@@ -2,7 +2,7 @@
 
 # A PSR-3 compatible logger
 
-A very basic [PSR-3](https://github.com/php-fig/fig-standards/blob/master/accepted/PSR-3-logger-interface.md) compatible logger using Drupal 7 `watchdog()` function.
+A very basic [PSR-3](https://github.com/php-fig/fig-standards/blob/master/accepted/PSR-3-logger-interface.md) compatible logger using Drupal 7 [`watchdog()` function](https://api.drupal.org/api/drupal/includes%21bootstrap.inc/function/watchdog/7.x).
 
 ## Installation
 
@@ -57,8 +57,14 @@ This library provides a custom handler for [Monolog](https://github.com/Seldaek/
   }
 ```
 
-You can also use variable replacements:
+You can also use variable replacements by adding the specific placeholders:
   
 ```php
-  $logger->alert('This is an %alert message.', array('variables' => array('%alert' => 'ALERT')));
+  $logger->alert('This is an {type} message.', array('type' => 'ALERT'));
+```
+
+[Drupal's watchdog function](https://api.drupal.org/api/drupal/includes%21bootstrap.inc/function/watchdog/7.x) also have a 'link' parameter that you can use:
+
+```php
+  $logger->warning('This is a {type} message.', array('type' => 'WARNING', 'link' => '<a href="https://github.com/">Github</a>'));
 ```
