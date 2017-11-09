@@ -48,15 +48,15 @@ trait Drupal7WatchdogHelpers
         $link = $record['context']['link'];
         unset($record['context']['variables'], $record['context']['link']);
 
-        // Convert PSR-3 placeholders to Drupal's placeholders.
-        $record['message'] = $this->interpolate($record['message'], $record['context']);
-
-        // Convert 'context' variables.
+        // Convert PSR-3 placeholders to Drupal's placeholders and convert
+        // 'context' variables.
+        $replace = [];
         foreach ($record['context'] as $key => &$value) {
             unset($record['context'][$key]);
 
             // check that the value can be casted to string
             if (!is_array($value) && (!is_object($value) || method_exists($value, '__toString'))) {
+                $replace['{' . $key . '}'] = '@' . $key;
                 $value = (string) $value;
             } else {
                 continue;
@@ -65,12 +65,13 @@ trait Drupal7WatchdogHelpers
             $variables['@' . $key] = (string) $value;
             $context_message[] = $key;
         }
+        $record['message'] = strtr($record['message'], $replace);
 
         // If any 'context_message', add it to the original record message.
         if (!empty($context_message)) {
-            $record['message'] .= ' (' . implode(', ', array_map(function ($item) {
+            $record['message'] .= ' [' . implode(', ', array_map(function ($item) {
                 return sprintf('%s: @%s', $item, $item);
-            }, $context_message)) . ')';
+            }, $context_message)) . ']';
         }
 
         // Add back variables to the context.
@@ -79,30 +80,6 @@ trait Drupal7WatchdogHelpers
         $record['context']['link'] = $link;
 
         return $record;
-    }
-
-    /**
-     * Interpolates context values into the message placeholders.
-     *
-     * @param string $message
-     * @param array $context
-     *
-     * @return string
-     */
-    private function interpolate($message, array $context = [])
-    {
-        // build a replacement array with braces around the context keys
-        $replace = [];
-
-        foreach ($context as $key => $val) {
-            // check that the value can be casted to string
-            if (!is_array($val) && (!is_object($val) || method_exists($val, '__toString'))) {
-                $replace['{' . $key . '}'] = '@' . $key;
-            }
-        }
-
-        // interpolate replacement values into the message and return
-        return strtr($message, $replace);
     }
 
     /**
