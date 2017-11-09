@@ -46,14 +46,12 @@ class WatchdogLogger extends AbstractLogger
             return;
         }
 
-        $record = array(
+        $record = $this->formatRecord([
             'message' => $message,
             'context' => $context,
             'level_name' => $level,
             'channel' => $this->getName(),
-        );
-
-        $record = $this->formatRecord($record);
+        ]);
 
         watchdog(
             $record['channel'],

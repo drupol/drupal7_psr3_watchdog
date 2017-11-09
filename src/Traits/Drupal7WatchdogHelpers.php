@@ -8,20 +8,8 @@ use UnexpectedValueException;
 trait Drupal7WatchdogHelpers
 {
     /**
-     * Get default properties.
-     *
-     * @return array
-     */
-    private function getDefaultProperties()
-    {
-        return [
-            'variables' => [],
-            'link' => '',
-        ];
-    }
-
-    /**
-     * Format record to be compliant with PSR-3 and Drupal's watchdog.
+     * Format record to be compliant with PSR-3 and Drupal's watchdog function
+     * signature.
      *
      * @param $record
      *   A log record.
@@ -31,41 +19,90 @@ trait Drupal7WatchdogHelpers
      */
     private function formatRecord($record)
     {
-        $context_message = array();
-        $record['context'] += $this->getDefaultProperties();
+        $context_message = [];
+
+        // Complete the array with keys that we need.
+        $record['context'] += [
+            'variables' => [],
+            'link' => '',
+        ];
+
+        // Convert the level_name to a watchdog level.
         $record['level'] = $this->psr3ToDrupal7($record['level_name']);
 
-        if (!is_array($record['context']['variables'])) {
-            $record['context']['variables'] = [];
-        }
+        // Make sure the message can be converted to a string.
+        $record['message'] = (string) $record['message'];
 
+        // Make sure the 'link' key is a string.
         if (!is_string($record['context']['link'])) {
             $record['context']['link'] = null;
         }
 
-        $record['message'] = (string) $record['message'];
-        foreach ($record['context']['variables'] as $key => $value) {
-            // If $value is an array, encode it as a JSON string.
-            if (is_array($value)) {
-                $value = json_encode($value);
-            }
-            // $value could be a string or an object  with a __toString() method
-            $record['context']['variables']['@' . $key] = (string) $value;
-
-            if (strpos($record['message'], '{' . $key . '}') !== FALSE) {
-                // Convert PSR-3 placeholder to drupal placeholder
-                $record['message'] = str_replace('{' . $key . '}', '@' . $key, $record['message']);
-            }
-            else {
-                $context_message[] = check_plain($key) . ': @' . $key;
-            }
+        // Make sure the 'variables' key is an array
+        if (!is_array($record['context']['variables'])) {
+            $record['context']['variables'] = [];
         }
 
+        // Store them for later use and delete them from the 'context' key.
+        $variables = $record['context']['variables'];
+        $link = $record['context']['link'];
+        unset($record['context']['variables'], $record['context']['link']);
+
+        // Convert PSR-3 placeholders to Drupal's placeholders.
+        $record['message'] = $this->interpolate($record['message'], $record['context']);
+
+        // Convert 'context' variables.
+        foreach ($record['context'] as $key => &$value) {
+            unset($record['context'][$key]);
+
+            // check that the value can be casted to string
+            if (!is_array($value) && (!is_object($value) || method_exists($value, '__toString'))) {
+                $value = (string) $value;
+            } else {
+                continue;
+            }
+
+            $variables['@' . $key] = (string) $value;
+            $context_message[] = $key;
+        }
+
+        // If any 'context_message', add it to the original record message.
         if (!empty($context_message)) {
-            $record['message'] .= ' (' . implode(', ', $context_message) . ')';
+            $record['message'] .= ' (' . implode(', ', array_map(function ($item) {
+                return sprintf('%s: @%s', $item, $item);
+            }, $context_message)) . ')';
         }
+
+        // Add back variables to the context.
+        $record['context']['variables'] = $variables;
+        // Add back the link.
+        $record['context']['link'] = $link;
 
         return $record;
+    }
+
+    /**
+     * Interpolates context values into the message placeholders.
+     *
+     * @param string $message
+     * @param array $context
+     *
+     * @return string
+     */
+    private function interpolate($message, array $context = [])
+    {
+        // build a replacement array with braces around the context keys
+        $replace = [];
+
+        foreach ($context as $key => $val) {
+            // check that the value can be casted to string
+            if (!is_array($val) && (!is_object($val) || method_exists($val, '__toString'))) {
+                $replace['{' . $key . '}'] = '@' . $key;
+            }
+        }
+
+        // interpolate replacement values into the message and return
+        return strtr($message, $replace);
     }
 
     /**
