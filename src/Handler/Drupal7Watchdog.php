@@ -18,21 +18,13 @@ class Drupal7Watchdog extends AbstractProcessingHandler
             return;
         }
 
-        $record['context'] += $this->getDefaultProperties();
-
-        if (!is_array($record['context']['variables'])) {
-            $record['context']['variables'] = [];
-        }
-
-        if (!is_string($record['context']['link'])) {
-            $record['context']['link'] = null;
-        }
+        $record = $this->formatRecord($record);
 
         watchdog(
             $record['channel'],
             $record['message'],
             $record['context']['variables'],
-            $this->psr3ToDrupal7($record['level_name']),
+            $record['level'],
             $record['context']['link']
         );
     }

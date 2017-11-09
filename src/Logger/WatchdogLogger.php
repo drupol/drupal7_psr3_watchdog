@@ -46,22 +46,21 @@ class WatchdogLogger extends AbstractLogger
             return;
         }
 
-        $context += $this->getDefaultProperties();
+        $record = array(
+            'message' => $message,
+            'context' => $context,
+            'level_name' => $level,
+            'channel' => $this->getName(),
+        );
 
-        if (!is_array($context['variables'])) {
-            $context['variables'] = [];
-        }
-
-        if (!is_string($context['link'])) {
-            $context['link'] = null;
-        }
+        $record = $this->formatRecord($record);
 
         watchdog(
-            $this->getName(),
-            $message,
-            $context['variables'],
-            $this->psr3ToDrupal7($level),
-            $context['link']
+            $record['channel'],
+            $record['message'],
+            $record['context']['variables'],
+            $record['level'],
+            $record['context']['link']
         );
     }
 }

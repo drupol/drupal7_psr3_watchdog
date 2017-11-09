@@ -21,6 +21,54 @@ trait Drupal7WatchdogHelpers
     }
 
     /**
+     * Format record to be compliant with PSR-3 and Drupal's watchdog.
+     *
+     * @param $record
+     *   A log record.
+     *
+     * @return array
+     *   A record array.
+     */
+    private function formatRecord($record)
+    {
+        $context_message = array();
+        $record['context'] += $this->getDefaultProperties();
+        $record['level'] = $this->psr3ToDrupal7($record['level_name']);
+
+        if (!is_array($record['context']['variables'])) {
+            $record['context']['variables'] = [];
+        }
+
+        if (!is_string($record['context']['link'])) {
+            $record['context']['link'] = null;
+        }
+
+        $record['message'] = (string) $record['message'];
+        foreach ($record['context']['variables'] as $key => $value) {
+            // If $value is an array, encode it as a JSON string.
+            if (is_array($value)) {
+                $value = json_encode($value);
+            }
+            // $value could be a string or an object  with a __toString() method
+            $record['context']['variables']['@' . $key] = (string) $value;
+
+            if (strpos($record['message'], '{' . $key . '}') !== FALSE) {
+                // Convert PSR-3 placeholder to drupal placeholder
+                $record['message'] = str_replace('{' . $key . '}', '@' . $key, $record['message']);
+            }
+            else {
+                $context_message[] = check_plain($key) . ': @' . $key;
+            }
+        }
+
+        if (!empty($context_message)) {
+            $record['message'] .= ' (' . implode(', ', $context_message) . ')';
+        }
+
+        return $record;
+    }
+
+    /**
      * Convert PSR-3 log level to Drupal 7 log level.
      *
      * @param int $level
