@@ -14,9 +14,7 @@ class Drupal7Watchdog extends AbstractProcessingHandler
      */
     protected function write(array $record)
     {
-        if (!function_exists('watchdog')) {
-            return;
-        }
+        $this->checkWatchdogAvailability();
 
         $record = $this->formatRecord($record);
 

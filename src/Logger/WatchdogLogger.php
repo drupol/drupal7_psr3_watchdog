@@ -42,9 +42,7 @@ class WatchdogLogger extends AbstractLogger
      */
     public function log($level, $message, array $context = [])
     {
-        if (!function_exists('watchdog')) {
-            return;
-        }
+        $this->checkWatchdogAvailability();
 
         $record = $this->formatRecord([
             'message' => $message,

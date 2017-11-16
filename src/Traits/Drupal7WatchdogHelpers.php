@@ -116,4 +116,11 @@ trait Drupal7WatchdogHelpers
 
         throw new UnexpectedValueException(sprintf('Invalid log level: %s', \filter_xss_admin($level)));
     }
+
+    private function checkWatchdogAvailability()
+    {
+        if (!function_exists('watchdog')) {
+            throw new \Exception("The watchdog() function hasn't been found.");
+        }
+    }
 }
