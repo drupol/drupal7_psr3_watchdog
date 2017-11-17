@@ -5,6 +5,11 @@ namespace drupol\drupal7_psr3_watchdog\Handler;
 use drupol\drupal7_psr3_watchdog\Traits\Drupal7WatchdogHelpers;
 use Monolog\Handler\AbstractProcessingHandler;
 
+/**
+ * Class Drupal7Watchdog.
+ *
+ * @codeCoverageIgnore
+ */
 class Drupal7Watchdog extends AbstractProcessingHandler
 {
     use Drupal7WatchdogHelpers;

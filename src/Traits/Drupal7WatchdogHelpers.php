@@ -3,7 +3,6 @@
 namespace drupol\drupal7_psr3_watchdog\Traits;
 
 use Psr\Log\LogLevel;
-use UnexpectedValueException;
 
 trait Drupal7WatchdogHelpers
 {
@@ -17,7 +16,7 @@ trait Drupal7WatchdogHelpers
      * @return array
      *   A record array.
      */
-    private function formatRecord($record)
+    public function formatRecord($record)
     {
         $context_message = [];
 
@@ -91,7 +90,7 @@ trait Drupal7WatchdogHelpers
      * @return int
      *   The Drupal level.
      */
-    private function psr3ToDrupal7($level)
+    public function psr3ToDrupal7($level)
     {
         $level = strtolower($level);
 
@@ -114,10 +113,15 @@ trait Drupal7WatchdogHelpers
                 return WATCHDOG_DEBUG;
         }
 
-        throw new UnexpectedValueException(sprintf('Invalid log level: %s', \filter_xss_admin($level)));
+        throw new \UnexpectedValueException(sprintf('Invalid log level: %s', $level));
     }
 
-    private function checkWatchdogAvailability()
+    /**
+     * Check if the watchdog function is available.
+     *
+     * @throws \Exception
+     */
+    public function checkWatchdogAvailability()
     {
         if (!function_exists('watchdog')) {
             throw new \Exception("The watchdog() function hasn't been found.");

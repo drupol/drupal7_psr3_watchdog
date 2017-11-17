@@ -68,3 +68,13 @@ You can also use variable replacements by adding the specific placeholders:
 ```php
   $logger->warning('This is a {type} message.', array('type' => 'WARNING', 'link' => '<a href="https://github.com/">Github</a>'));
 ```
+
+## Tests
+
+Test and coverage are provided by [PHPSpec](http://www.phpspec.net/).
+
+To run the tests:
+
+```
+composer phpspec
+```

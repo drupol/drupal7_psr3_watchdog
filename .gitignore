@@ -24,3 +24,4 @@ ecasclient.log
 /log/
 /composer.lock
 /.php_cs.cache
+/build/

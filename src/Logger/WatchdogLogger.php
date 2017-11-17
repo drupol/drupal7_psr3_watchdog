@@ -5,6 +5,11 @@ namespace drupol\drupal7_psr3_watchdog\Logger;
 use drupol\drupal7_psr3_watchdog\Traits\Drupal7WatchdogHelpers;
 use Psr\Log\AbstractLogger;
 
+/**
+ * Class WatchdogLogger.
+ *
+ * @codeCoverageIgnore
+ */
 class WatchdogLogger extends AbstractLogger
 {
     use Drupal7WatchdogHelpers;
