@@ -74,24 +74,49 @@ class Drupal7WatchdogHelpersStubSpec extends ObjectBehavior
         $this->formatRecord($input)->shouldBe($expected);
 
         $input = [
-            'message' => 'This is a log message of level',
+            'message' => 'This is a log {message} of level',
             'context' => [
                 'variables' => 'var',
                 'link' => [],
+                'message' => 'message',
+                'object' => ['exception'],
             ],
             'level_name' => 'error',
             'channel' => 'drupal',
         ];
 
         $expected = [
-            'message' => 'This is a log message of level',
+            'message' => 'This is a log @message of level [message: @message]',
             'context' => [
-                'variables' => [],
+                'variables' => [
+                  '@message' => 'message',
+                ],
                 'link' => null,
             ],
             'level_name' => 'error',
             'channel' => 'drupal',
             'level' => 3
+        ];
+
+        $this->formatRecord($input)->shouldBeArray();
+        $this->formatRecord($input)->shouldBe($expected);
+
+        $input = [
+          'message' => 'This is a log {message} of level',
+          'context' => '',
+          'level_name' => 'error',
+          'channel' => 'drupal',
+        ];
+
+        $expected = [
+          'message' => 'This is a log {message} of level',
+          'context' => [
+            'variables' => [],
+              'link' => '',
+          ],
+          'level_name' => 'error',
+          'channel' => 'drupal',
+          'level' => 3
         ];
 
         $this->formatRecord($input)->shouldBeArray();

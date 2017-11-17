@@ -20,10 +20,22 @@ trait Drupal7WatchdogHelpers
     {
         $context_message = [];
 
+        // Make sure the $record variable contains everything needed.
+        $record += [
+          'context' => [],
+          'message' => '',
+          'level_name' => 0,
+        ];
+
+        // Make sure the 'context' key is an array
+        if (!is_array($record['context'])) {
+            $record['context'] = [];
+        }
+
         // Complete the array with keys that we need.
         $record['context'] += [
-            'variables' => [],
-            'link' => '',
+          'variables' => [],
+          'link' => '',
         ];
 
         // Convert the level_name to a watchdog level.
@@ -50,13 +62,10 @@ trait Drupal7WatchdogHelpers
         // Convert PSR-3 placeholders to Drupal's placeholders and convert
         // 'context' variables.
         $replace = [];
-        foreach ($record['context'] as $key => &$value) {
-            unset($record['context'][$key]);
-
+        foreach ($record['context'] as $key => $value) {
             // check that the value can be casted to string
             if (!is_array($value) && (!is_object($value) || method_exists($value, '__toString'))) {
                 $replace['{' . $key . '}'] = '@' . $key;
-                $value = (string) $value;
             } else {
                 continue;
             }
@@ -74,9 +83,10 @@ trait Drupal7WatchdogHelpers
         }
 
         // Add back variables to the context.
-        $record['context']['variables'] = $variables;
-        // Add back the link.
-        $record['context']['link'] = $link;
+        $record['context'] = [
+          'variables' => $variables,
+          'link' => $link
+        ];
 
         return $record;
     }
