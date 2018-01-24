@@ -2,7 +2,7 @@
   "name": "drupol/drupal7_psr3_watchdog",
   "description": "A PSR3 logger using Drupal 7 watchdog.",
   "type": "library",
-  "license": "EUPL",
+  "license": "EUPL-1.1",
   "keywords": ["log", "logging", "psr-3", "drupal", "watchdog"],
   "homepage": "http://github.com/drupol/drupal7_psr3_watchdog",
   "authors": [
