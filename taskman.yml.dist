@@ -1,0 +1,7 @@
+github:
+  changelog:
+    user: drupol
+    project: drupal7_psr3_watchdog
+    release:
+      branch: 'master'
+    between-tags: "$(git tag --sort=-creatordate --merged '${github.changelog.release.branch}' | tr '\n' ',')"

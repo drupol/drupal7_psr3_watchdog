@@ -7,12 +7,7 @@ use PhpSpec\ObjectBehavior;
 
 class Drupal7WatchdogHelpersStubSpec extends ObjectBehavior
 {
-    public function it_is_initializable()
-    {
-        $this->shouldHaveType(Drupal7WatchdogHelpersStub::class);
-    }
-
-    public function it_is_detecting_if_watchdog_is_available()
+    public function it_can_bootstrap()
     {
         $this->shouldThrow(\Exception::class)->during('checkWatchdogAvailability', []);
 
@@ -50,7 +45,7 @@ class Drupal7WatchdogHelpersStubSpec extends ObjectBehavior
             'context' => [
                 'level' => 3,
                 'foo' => 'bar',
-                'link' => '<a href="https://google.com/">Google</a>'
+                'link' => '<a href="https://google.com/">Google</a>',
             ],
             'level_name' => 'error',
             'channel' => 'drupal',
@@ -67,7 +62,7 @@ class Drupal7WatchdogHelpersStubSpec extends ObjectBehavior
             ],
             'level_name' => 'error',
             'channel' => 'drupal',
-            'level' => 3
+            'level' => 3,
         ];
 
         $this->formatRecord($input)->shouldBeArray();
@@ -89,37 +84,42 @@ class Drupal7WatchdogHelpersStubSpec extends ObjectBehavior
             'message' => 'This is a log @message of level [message: @message]',
             'context' => [
                 'variables' => [
-                  '@message' => 'message',
+                    '@message' => 'message',
                 ],
                 'link' => null,
             ],
             'level_name' => 'error',
             'channel' => 'drupal',
-            'level' => 3
+            'level' => 3,
         ];
 
         $this->formatRecord($input)->shouldBeArray();
         $this->formatRecord($input)->shouldBe($expected);
 
         $input = [
-          'message' => 'This is a log {message} of level',
-          'context' => '',
-          'level_name' => 'error',
-          'channel' => 'drupal',
+            'message' => 'This is a log {message} of level',
+            'context' => '',
+            'level_name' => 'error',
+            'channel' => 'drupal',
         ];
 
         $expected = [
-          'message' => 'This is a log {message} of level',
-          'context' => [
-            'variables' => [],
-              'link' => '',
-          ],
-          'level_name' => 'error',
-          'channel' => 'drupal',
-          'level' => 3
+            'message' => 'This is a log {message} of level',
+            'context' => [
+                'variables' => [],
+                'link' => '',
+            ],
+            'level_name' => 'error',
+            'channel' => 'drupal',
+            'level' => 3,
         ];
 
         $this->formatRecord($input)->shouldBeArray();
         $this->formatRecord($input)->shouldBe($expected);
+    }
+
+    public function it_is_initializable()
+    {
+        $this->shouldHaveType(Drupal7WatchdogHelpersStub::class);
     }
 }

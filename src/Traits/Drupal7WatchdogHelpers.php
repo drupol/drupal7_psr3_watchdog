@@ -7,35 +7,47 @@ use Psr\Log\LogLevel;
 trait Drupal7WatchdogHelpers
 {
     /**
+     * Check if the watchdog function is available.
+     *
+     * @throws \Exception
+     */
+    public function checkWatchdogAvailability()
+    {
+        if (!\function_exists('watchdog')) {
+            throw new \Exception("The watchdog() function hasn't been found.");
+        }
+    }
+
+    /**
      * Format record to be compliant with PSR-3 and Drupal's watchdog function
      * signature.
      *
-     * @param $record
+     * @param array $record
      *   A log record.
      *
      * @return array
      *   A record array.
      */
-    public function formatRecord($record)
+    public function formatRecord(array $record)
     {
         $context_message = [];
 
         // Make sure the $record variable contains everything needed.
         $record += [
-          'context' => [],
-          'message' => '',
-          'level_name' => 0,
+            'context' => [],
+            'message' => '',
+            'level_name' => 0,
         ];
 
         // Make sure the 'context' key is an array
-        if (!is_array($record['context'])) {
+        if (!\is_array($record['context'])) {
             $record['context'] = [];
         }
 
         // Complete the array with keys that we need.
         $record['context'] += [
-          'variables' => [],
-          'link' => '',
+            'variables' => [],
+            'link' => '',
         ];
 
         // Convert the level_name to a watchdog level.
@@ -45,12 +57,12 @@ trait Drupal7WatchdogHelpers
         $record['message'] = (string) $record['message'];
 
         // Make sure the 'link' key is a string.
-        if (!is_string($record['context']['link'])) {
+        if (!\is_string($record['context']['link'])) {
             $record['context']['link'] = null;
         }
 
         // Make sure the 'variables' key is an array
-        if (!is_array($record['context']['variables'])) {
+        if (!\is_array($record['context']['variables'])) {
             $record['context']['variables'] = [];
         }
 
@@ -62,9 +74,10 @@ trait Drupal7WatchdogHelpers
         // Convert PSR-3 placeholders to Drupal's placeholders and convert
         // 'context' variables.
         $replace = [];
+
         foreach ($record['context'] as $key => $value) {
             // check that the value can be casted to string
-            if (!is_array($value) && (!is_object($value) || method_exists($value, '__toString'))) {
+            if (!\is_array($value) && (!\is_object($value) || method_exists($value, '__toString'))) {
                 $replace['{' . $key . '}'] = '@' . $key;
             } else {
                 continue;
@@ -77,15 +90,15 @@ trait Drupal7WatchdogHelpers
 
         // If any 'context_message', add it to the original record message.
         if (!empty($context_message)) {
-            $record['message'] .= ' [' . implode(', ', array_map(function ($item) {
+            $record['message'] .= ' [' . implode(', ', array_map(static function ($item) {
                 return sprintf('%s: @%s', $item, $item);
             }, $context_message)) . ']';
         }
 
         // Add back variables to the context.
         $record['context'] = [
-          'variables' => $variables,
-          'link' => $link
+            'variables' => $variables,
+            'link' => $link,
         ];
 
         return $record;
@@ -102,7 +115,7 @@ trait Drupal7WatchdogHelpers
      */
     public function psr3ToDrupal7($level)
     {
-        $level = strtolower($level);
+        $level = mb_strtolower((string) $level);
 
         switch ($level) {
             case LogLevel::EMERGENCY:
@@ -124,17 +137,5 @@ trait Drupal7WatchdogHelpers
         }
 
         throw new \UnexpectedValueException(sprintf('Invalid log level: %s', $level));
-    }
-
-    /**
-     * Check if the watchdog function is available.
-     *
-     * @throws \Exception
-     */
-    public function checkWatchdogAvailability()
-    {
-        if (!function_exists('watchdog')) {
-            throw new \Exception("The watchdog() function hasn't been found.");
-        }
     }
 }

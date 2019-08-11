@@ -76,5 +76,5 @@ Test and coverage are provided by [PHPSpec](http://www.phpspec.net/).
 To run the tests:
 
 ```
-composer phpspec
+composer grumphp
 ```
